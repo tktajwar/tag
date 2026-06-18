@@ -7,6 +7,7 @@ repository = "https://codeberg.org/tktajwar/tag"
 categories = ["command-line-utilities", "text-editors", "database"]
 
 [dependencies]
+clap = { version = "4.6.1", features = ["derive"] }
 memmap2 = "0.9.9"
 regex = "1.3.9"
 rust_decimal = "1.38.0"

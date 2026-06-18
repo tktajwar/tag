@@ -169,7 +169,7 @@ A binary file that's used to speed up tag operation.
 
 If the Tagfile was manually modified, syncronize the helper file.
 
-* TODO Command-line interface [0/5]
+* TODO Command-line interface [1/5]
 
 Command-line commands.
 
@@ -209,7 +209,7 @@ Exclude items with the given flag(s).
 
 Exclude items that has attribute set to the given value.
 
-** TODO "view" command
+** DONE "search" command
 
 Given a list of TagID as argument or standard input, print out their taglines.
 
