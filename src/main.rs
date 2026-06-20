@@ -15,16 +15,8 @@ struct Args {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Search for tag items with given IDs [not filterable]
-    Search {
-	/// The IDs of the items to search for
-        #[command()]
-        tagids: Vec<String>,
-
-	/// Use linear search instead of binary
-	#[arg(long, default_value_t = false)]
-	linear: bool,
-    },
+    /// Return all items
+    All,
 
     /// Return all tag items from the given ID
     From {
@@ -61,6 +53,17 @@ enum Commands {
 	#[arg(short='x', long, default_value_t = false)]
 	exclusive: bool,
     },
+
+    /// Search for tag items with given IDs [not filterable]
+    Search {
+	/// The IDs of the items to search for
+        #[command()]
+        tagids: Vec<String>,
+
+	/// Use linear search instead of binary
+	#[arg(long, default_value_t = false)]
+	linear: bool,
+    },
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -68,6 +71,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let ptag = PlainTag::try_from(args.file.as_str())?;
 
     let iter = match &args.command {
+	Commands::All => {
+	    ptag.items()
+	},
+
 	Commands::Search {tagids, linear} => {
 	    match linear {
 		false => for tagid in tagids {
