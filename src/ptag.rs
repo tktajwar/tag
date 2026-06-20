@@ -45,6 +45,33 @@ impl PlainTag {
 	}
     }
 
+    /// Returns an iterator over the tag items starting from the given
+    /// ID.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let ptag = tag::PlainTag::try_from("Tagfile").unwrap();
+    /// let mut tag_items = ptag.start_from(
+    ///     tag::TagID::try_from("@1.0").unwrap()
+    /// );
+    /// ```
+
+    pub fn start_from(&self, id: TagID) -> PTagIteratorConstrained<'_> {
+	let (_, from) = self.binary_search(id);
+	PTagIteratorConstrained {
+	    iter: PTagIteratorType::NonConstrained(
+		Box::new(PTagIterator {
+		    iter: str::from_utf8(
+			&self.tagfile[from..])
+			.unwrap()
+			.split('\n')
+		})
+	    ),
+	    constraint: PTagIteratorConstraint::None,
+	}
+    }
+
     /// Returns the tag item with the given tag ID after performing a
     /// linear search, or `None` if it's not found.
     ///
