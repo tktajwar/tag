@@ -9,6 +9,10 @@ struct Args {
     #[arg(short, long, default_value = "Tagfile")]
     file: String,
 
+    /// Only include items with the given flags
+    #[arg(short, long="with", default_value = None)]
+    with_flags: Option<String>,
+
     #[command(subcommand)]
     command: Commands,
 }
@@ -70,7 +74,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
     let ptag = PlainTag::try_from(args.file.as_str())?;
 
-    let iter = match &args.command {
+    let mut iter = match &args.command {
 	Commands::All => {
 	    ptag.items()
 	},
@@ -120,6 +124,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 	    }
 	},
     };
+
+    if let Some(flags) = args.with_flags {
+	for flag in flags.split(' ') {
+	    let flag = if flag.starts_with('#') {
+		flag.to_string()
+	    } else {
+		format!("#{flag}")
+	    };
+	    iter = iter.with_flag(flag);
+	}
+    }
 
     for item in iter {
 	println!("{}", item);
