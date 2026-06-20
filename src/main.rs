@@ -15,7 +15,7 @@ struct Args {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Search for tag items
+    /// Search for tag items with given IDs [not filterable]
     Search {
 	/// The IDs of the items to search for
         #[command()]
@@ -24,6 +24,27 @@ enum Commands {
 	/// Use linear search instead of binary
 	#[arg(long, default_value_t = false)]
 	linear: bool,
+    },
+
+    /// Return all tag items from the given ID
+    From {
+	/// The tag ID to start from
+        #[command()]
+        from_tagid: String,
+    },
+
+    /// Return all tag items upto the given ID
+    Upto {
+	/// The tag ID to return up to
+        #[command()]
+        to_tagid: String,
+    },
+
+    /// Return all tag items until the given ID
+    Until {
+	/// The tag ID to return until
+        #[command()]
+        to_tagid: String,
     },
 
     /// Return all tag items from and up to/until the given IDs
@@ -36,7 +57,7 @@ enum Commands {
 	#[command()]
 	to_tagid: String,
 
-	/// Fetch upto second tag ID instead of upto
+	/// Return upto second tag ID instead of upto
 	#[arg(short='x', long, default_value_t = false)]
 	exclusive: bool,
     },
@@ -65,6 +86,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 	    return Ok(())
 	},
+
+	Commands::From {from_tagid} => {
+	    let from = tag::TagID::try_from(from_tagid.as_str())?;
+	    ptag.start_from(from)
+	},
+
+	Commands::Upto {to_tagid} => {
+	    let to = tag::TagID::try_from(to_tagid.as_str())?;
+	    ptag.items().upto(to)
+	},
+
+	Commands::Until {to_tagid} => {
+	    let to = tag::TagID::try_from(to_tagid.as_str())?;
+	    ptag.items().until(to)
+	},
+
 	Commands::Between {from_tagid, to_tagid, exclusive} => {
 	    let from = tag::TagID::try_from(from_tagid.as_str())?;
 	    let to = tag::TagID::try_from(to_tagid.as_str())?;
