@@ -13,6 +13,10 @@ struct Args {
     #[arg(short, long="with", default_value = None)]
     with_flags: Option<String>,
 
+    /// Exclude items with the given flags
+    #[arg(short='o', long="without", default_value = None)]
+    without_flags: Option<String>,
+
     #[command(subcommand)]
     command: Commands,
 }
@@ -126,13 +130,28 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     if let Some(flags) = args.with_flags {
-	for flag in flags.split(' ') {
+	for flag in flags.trim().split(' ') {
+	    let flag = flag.trim();
+	    if flag.len() < 1 { continue };
 	    let flag = if flag.starts_with('#') {
 		flag.to_string()
 	    } else {
 		format!("#{flag}")
 	    };
 	    iter = iter.with_flag(flag);
+	}
+    }
+
+    if let Some(flags) = args.without_flags {
+	for flag in flags.trim().split(' ') {
+	    let flag = flag.trim();
+	    if flag.len() < 1 { continue };
+	    let flag = if flag.starts_with('#') {
+		flag.to_string()
+	    } else {
+		format!("#{flag}")
+	    };
+	    iter = iter.without_flag(flag);
 	}
     }
 
