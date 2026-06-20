@@ -36,7 +36,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 	    match linear {
 		false => for tagid in tagids {
 		    let id = tag::TagID::try_from(tagid.as_str())?;
-		    if let Ok(item) = ptag.binary_search(id) {
+		    if let (Ok(item), _) = ptag.binary_search(id) {
 			println!("{}", item);
 		    }
 		},

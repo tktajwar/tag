@@ -74,20 +74,23 @@ impl PlainTag {
     /// ```
     /// let ptag = tag::PlainTag::try_from("Tagfile").unwrap();
     /// let id = tag::TagID::try_from("@1.0").unwrap();
-    /// let a = ptag.binary_search(id);
+    /// let (a, pointer) = ptag.binary_search(id);
     /// ```
 
     pub fn binary_search(
 	&self,
 	id: TagID
-    ) -> Result<TagItem, Box<dyn Error>> {
+    ) -> (Result<TagItem, Box<dyn Error>>, usize) {
 	let mut s = self.list_start;
 	let mut e = self.tagfile.len() as usize - 1;
 
 	while s <= e {
 	    let m = (s + e) / 2;
 	    let (start, end) = self.line_range(m);
-	    let m_item = self.item_at(start, end)?;
+	    let m_item = match self.item_at(start, end) {
+		Ok(item) => item,
+		Err(e) => return (Err(e), s),
+	    };
 	    let m_id = m_item.id;
 
 	    if id > m_id {
@@ -95,11 +98,11 @@ impl PlainTag {
 	    } else if id < m_id {
 		e = start - 1;
 	    } else {
-		return Ok(m_item);
+		return (Ok(m_item), start);
 	    }
 	}
 
-	Err(Box::from(format!("Item {} Not Found.", id)))
+	(Err(Box::from(format!("Item {} Not Found.", id))), s)
     }
 
     fn line_range(
