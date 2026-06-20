@@ -25,13 +25,28 @@ enum Commands {
 	#[arg(long, default_value_t = false)]
 	linear: bool,
     },
+
+    /// Return all tag items from and up to/until the given IDs
+    Between {
+	/// The tag ID to start from
+        #[command()]
+        from_tagid: String,
+
+	/// The tag ID to stop at
+	#[command()]
+	to_tagid: String,
+
+	/// Fetch upto second tag ID instead of upto
+	#[arg(short='x', long, default_value_t = false)]
+	exclusive: bool,
+    },
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
     let ptag = PlainTag::try_from(args.file.as_str())?;
 
-    match &args.command {
+    let iter = match &args.command {
 	Commands::Search {tagids, linear} => {
 	    match linear {
 		false => for tagid in tagids {
@@ -47,7 +62,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 		    }
 		},
 	    }
+
+	    return Ok(())
 	},
+	Commands::Between {from_tagid, to_tagid, exclusive} => {
+	    let from = tag::TagID::try_from(from_tagid.as_str())?;
+	    let to = tag::TagID::try_from(to_tagid.as_str())?;
+	    let iter = ptag.start_from(from);
+	    if *exclusive {
+		iter.until(to)
+	    } else {
+		iter.upto(to)
+	    }
+	},
+    };
+
+    for item in iter {
+	println!("{}", item);
     }
 
     Ok(())
