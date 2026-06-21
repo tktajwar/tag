@@ -185,11 +185,11 @@ Given a TagID as argument or standard input, generate the next one.
 
 Given two TagID as arguments or standard input, generate one between them.
 
-** TODO "where" command [0/2]
+** TODO filter commands [1/2]
 
 Given a range of conditions, return the TagID of items that match them all.
 
-*** TODO flag(s) rule
+*** DONE with-flag(s) command
 
 Must have the given flag(s).
 
@@ -197,11 +197,11 @@ Must have the given flag(s).
 
 Must have the attribute set to the given value.
 
-** TODO "exclude" command [0/2]
+** TODO filter exclude commands [1/2]
 
 Given a range of conditions, exclude the TagID of items that match those conditions.
 
-*** TODO flags(s) exclusion rule
+*** DONE without-flags(s) command
 
 Exclude items with the given flag(s).
 
