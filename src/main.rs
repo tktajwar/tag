@@ -1,28 +1,19 @@
-use clap::{Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 
 use tag::PlainTag;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
-struct Args {
-    /// Path to the tagfile
-    #[arg(short, long, default_value = "Tagfile")]
-    file: String,
-
-    /// Only include items with the given flags
-    #[arg(short, long="with", default_value = None)]
-    with_flags: Option<String>,
-
-    /// Exclude items with the given flags
-    #[arg(short='o', long="without", default_value = None)]
-    without_flags: Option<String>,
+struct CLI {
+    #[clap(flatten)]
+    global_opts: GlobalOpts,
 
     #[command(subcommand)]
-    command: Commands,
+    select: Select,
 }
 
 #[derive(Subcommand)]
-enum Commands {
+enum Select {
     /// Return all items
     All,
 
@@ -74,16 +65,32 @@ enum Commands {
     },
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let args = Args::parse();
-    let ptag = PlainTag::try_from(args.file.as_str())?;
+#[derive(Args)]
+struct GlobalOpts {
+    /// Path to the tagfile
+    #[arg(short, long, default_value = "Tagfile")]
+    file: String,
 
-    let mut iter = match &args.command {
-	Commands::All => {
+    /// Only include items with the given flags
+    #[arg(short, long="with", default_value = None)]
+    with_flags: Option<String>,
+
+    /// Exclude items with the given flags
+    #[arg(short='o', long="without", default_value = None)]
+    without_flags: Option<String>,
+
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let cli = CLI::parse();
+    let ptag = PlainTag::try_from(cli.global_opts.file.as_str())?;
+
+    let mut iter = match &cli.select {
+	Select::All => {
 	    ptag.items()
 	},
 
-	Commands::Search {tagids, linear} => {
+	Select::Search {tagids, linear} => {
 	    match linear {
 		false => for tagid in tagids {
 		    let id = tag::TagID::try_from(tagid.as_str())?;
@@ -102,22 +109,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 	    return Ok(())
 	},
 
-	Commands::From {from_tagid} => {
+	Select::From {from_tagid} => {
 	    let from = tag::TagID::try_from(from_tagid.as_str())?;
 	    ptag.start_from(from)
 	},
 
-	Commands::Upto {to_tagid} => {
+	Select::Upto {to_tagid} => {
 	    let to = tag::TagID::try_from(to_tagid.as_str())?;
 	    ptag.items().upto(to)
 	},
 
-	Commands::Until {to_tagid} => {
+	Select::Until {to_tagid} => {
 	    let to = tag::TagID::try_from(to_tagid.as_str())?;
 	    ptag.items().until(to)
 	},
 
-	Commands::Between {from_tagid, to_tagid, exclusive} => {
+	Select::Between {from_tagid, to_tagid, exclusive} => {
 	    let from = tag::TagID::try_from(from_tagid.as_str())?;
 	    let to = tag::TagID::try_from(to_tagid.as_str())?;
 	    let iter = ptag.start_from(from);
@@ -129,7 +136,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 	},
     };
 
-    if let Some(flags) = args.with_flags {
+    if let Some(flags) = cli.global_opts.with_flags {
 	for flag in flags.trim().split(' ') {
 	    let flag = flag.trim();
 	    if flag.len() < 1 { continue };
@@ -142,7 +149,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 	}
     }
 
-    if let Some(flags) = args.without_flags {
+    if let Some(flags) = cli.global_opts.without_flags {
 	for flag in flags.trim().split(' ') {
 	    let flag = flag.trim();
 	    if flag.len() < 1 { continue };
