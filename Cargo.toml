@@ -1,9 +1,9 @@
 [package]
-name = "tajwar-tag"
+name = "tag-db"
 version = "0.4.0"
 edition = "2024"
 authors = ["Sayed Takey Tajwar Arko <sayed.takey.tajwar@g.bracu.ac.bd>"]
-repository = "https://codeberg.org/tktajwar/tag"
+repository = "https://codeberg.org/tktajwar/tag-db"
 categories = ["command-line-utilities", "text-editors", "database"]
 
 [dependencies]
