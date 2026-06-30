@@ -10,12 +10,12 @@ static RE_TAG_NUMBER: LazyLock<Regex> =
 
 static RE_FLAG: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(
-	r"#[0-9a-zA-Z_\-]+"
+	r"#[0-9a-zA-Z_]+"
     ).unwrap());
 
 static RE_FLAGS: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(
-	r"^\s*(#[0-9a-zA-Z_\-]+(?:\s*#[0-9a-zA-Z_\-]+)*)\s*$"
+	r"^\s*(#[0-9a-zA-Z_]+(?:\s*#[0-9a-zA-Z_]+)*)\s*$"
     ).unwrap());
 
 static RE_ATTRIBUTE: LazyLock<Regex> =
@@ -485,7 +485,7 @@ impl TagItem {
     /// ```
     /// let a = tag::TagItem::try_from(
     ///     "@1.0 | My Title | #hello #world | :src: code | \
-    ///      :invalid | #valid-flag | #inva!!lid"
+    ///      :invalid | #valid_flag | #inva!!lid"
     /// ).unwrap();
     /// let mut fields_iter = a.fields();
     ///
@@ -510,7 +510,7 @@ impl TagItem {
     ///     fields_iter.next(),
     /// );
     /// assert_eq!(
-    ///     Some(tag::TagField::Flags(" #valid-flag ")),
+    ///     Some(tag::TagField::Flags(" #valid_flag ")),
     ///     fields_iter.next()
     /// );
     /// assert_eq!(
@@ -533,13 +533,13 @@ impl TagItem {
     /// ```
     /// let a = tag::TagItem::try_from(
     ///     "@1.0 | My Title | #hello #world | \
-    ///      :invalid | #valid-flag | #inva!!lid"
+    ///      :invalid | #valid_flag | #inva!!lid"
     /// ).unwrap();
     /// assert_eq!(
     ///     Some(vec![
     ///         "#hello".to_string(),
     ///         "#world".to_string(),
-    ///         "#valid-flag".to_string(),
+    ///         "#valid_flag".to_string(),
     ///     ]),
     ///     a.flags(),
     /// );
@@ -574,7 +574,7 @@ impl TagItem {
     /// ```
     /// let a = tag::TagItem::try_from(
     ///     "@1.0 | My Title | #hello #world |\
-    ///      :invalid | #valid-flag | #inva!!lid"
+    ///      :invalid | #valid_flag | #inva!!lid"
     /// ).unwrap();
     ///
     /// assert!(!(a.has_flag(&"#test".to_string())));
@@ -599,12 +599,12 @@ impl TagItem {
     /// ```
     /// let a = tag::TagItem::try_from(
     ///     "@1.0 | My Title | #hello #world |\
-    ///      :invalid | #valid-flag | #inva!!lid"
+    ///      :invalid | #valid_flag | #inva!!lid"
     /// ).unwrap();
     /// assert!(a.has_flags(vec![
     ///     "#hello".to_string(),
     ///     "#world".to_string(),
-    ///     "#valid-flag".to_string(),
+    ///     "#valid_flag".to_string(),
     /// ]));
     /// assert!(!a.has_flags(vec![
     ///     "#does".to_string(),
@@ -813,11 +813,11 @@ impl TagItem {
     /// let b = tag::TagItem::try_from(
     ///     "@1.0 | No Prior Flags"
     /// ).unwrap();
-    /// let b = b.insert_flag("#you-have-a-flag-now");
+    /// let b = b.insert_flag("#you_have_a_flag_now");
     ///
     /// assert_eq!(
     ///     Some(vec![
-    ///         "#you-have-a-flag-now".to_string(),
+    ///         "#you_have_a_flag_now".to_string(),
     ///     ]),
     ///     b.flags(),
     /// );
