@@ -123,6 +123,12 @@ impl PlainTag {
 	    if id > m_id {
 		s = max(end, m) + 1;
 	    } else if id < m_id {
+		if start == 0 {
+		    return (
+			Err(Box::from(format!("Item {} Not Found.", id))),
+			s,
+		    )
+		}
 		e = start - 1;
 	    } else {
 		return (Ok(m_item), start);
