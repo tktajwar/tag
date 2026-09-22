@@ -1,6 +1,14 @@
 use clap::{Args, Parser, Subcommand};
+use regex::Regex;
+use std::sync::LazyLock;
 
 use tag::PlainTag;
+
+
+static RE_FILTER: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(
+	r"\s*([+-])\s*((#)[0-9a-zA-Z_]+|(:)(.+?)?:\s*([^+-]*[^\s+-]))\s*"
+    ).unwrap());
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -71,14 +79,9 @@ struct GlobalOpts {
     #[arg(short, long, default_value = "Tagfile")]
     file: String,
 
-    /// Only include items with the given flags
-    #[arg(short, long="with", default_value = None)]
-    with_flags: Option<String>,
-
-    /// Exclude items with the given flags
-    #[arg(short='o', long="without", default_value = None)]
-    without_flags: Option<String>,
-
+    /// Filter items
+    #[arg(short='F', long, default_value = "")]
+    filter: String,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -136,30 +139,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 	},
     };
 
-    if let Some(flags) = cli.global_opts.with_flags {
-	for flag in flags.trim().split(' ') {
-	    let flag = flag.trim();
-	    if flag.len() < 1 { continue };
-	    let flag = if flag.starts_with('#') {
-		flag.to_string()
-	    } else {
-		format!("#{flag}")
-	    };
-	    iter = iter.with_flag(flag);
-	}
-    }
-
-    if let Some(flags) = cli.global_opts.without_flags {
-	for flag in flags.trim().split(' ') {
-	    let flag = flag.trim();
-	    if flag.len() < 1 { continue };
-	    let flag = if flag.starts_with('#') {
-		flag.to_string()
-	    } else {
-		format!("#{flag}")
-	    };
-	    iter = iter.without_flag(flag);
-	}
+    for filter in RE_FILTER.captures_iter(&cli.global_opts.filter) {
+	match (
+	    filter.get(1).map(|s| s.as_str()),
+	    filter.get(2).map(|s| s.as_str()),
+	    filter.get(3).map(|s| s.as_str()),
+	    filter.get(4).map(|s| s.as_str()),
+	    filter.get(5).map(|s| s.as_str()),
+	    filter.get(6).map(|s| s.as_str()),
+	) {
+	    (Some("+"), Some(flag), Some("#"), None, _, _) => {
+		iter = iter.with_flag(flag.to_string())
+	    },
+	    (Some("-"), Some(flag), Some("#"), None, _, _) => {
+		iter = iter.without_flag(flag.to_string())
+	    },
+	    (Some("+"), _, None, Some(":"), attribute, value) => {
+		iter = iter.match_attribute(
+		    attribute.map(|s| s.to_string()),
+		    value.map(|s| s.to_string()),
+		)
+	    },
+	    _ => eprintln!("Error parsing filter"),
+	};
     }
 
     for item in iter {
