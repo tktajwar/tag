@@ -169,7 +169,7 @@ A binary file that's used to speed up tag operation.
 
 If the Tagfile was manually modified, syncronize the helper file.
 
-* TODO Command-line interface [1/5]
+* TODO Command-line interface [2/5]
 
 Command-line commands.
 
@@ -185,7 +185,7 @@ Given a TagID as argument or standard input, generate the next one.
 
 Given two TagID as arguments or standard input, generate one between them.
 
-** TODO filter commands [1/2]
+** DONE filter commands [2/2]
 
 Given a range of conditions, return the TagID of items that match them all.
 
@@ -193,7 +193,7 @@ Given a range of conditions, return the TagID of items that match them all.
 
 Must have the given flag(s).
 
-*** TODO attribute: value rule
+*** DONE attribute: value rule
 
 Must have the attribute set to the given value.
 
